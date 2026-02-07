@@ -51,16 +51,16 @@ const dropAllTables = async () => {
     try {
       await client.query(`
         DROP TABLE IF EXISTS
-          enrollment,
+          enrollments,
           teaches,
-          course_topic,
-          content,
-          course,
-          topic,
-          textbook,
+          course_topics,
+          contents,
+          courses,
+          topics,
+          textbooks,
           partner_university,
-          instructor,
-          student,
+          instructors,
+          students,
           users
         CASCADE;
 

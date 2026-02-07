@@ -1,4 +1,6 @@
---- ENUMS
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ENUMS
 CREATE TYPE role_enum AS ENUM (
     'ADMIN', 
     'STUDENT', 
@@ -18,38 +20,29 @@ CREATE TYPE content_enum AS ENUM (
     'NOTES'
 );
 
---- TABLE DEFINITIONS
+-- Table definitions
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     role role_enum NOT NULL,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-    UNIQUE (id, role)
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE student (
-    user_id UUID PRIMARY KEY,
-    role role_enum NOT NULL DEFAULT 'STUDENT' CHECK (role = 'STUDENT'),
-    name TEXT NOT NULL,
+CREATE TABLE students (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     age INT CHECK (age > 0),
     country TEXT,
     skill_level TEXT,
-    category TEXT,
-
-    FOREIGN KEY (user_id, role) REFERENCES users(id, role) ON DELETE CASCADE
+    category TEXT
 );
 
-CREATE TABLE instructor (
-    user_id UUID PRIMARY KEY,
-    role role_enum NOT NULL DEFAULT 'INSTRUCTOR' CHECK (role = 'INSTRUCTOR'),
-    name TEXT NOT NULL,
+CREATE TABLE instructors (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     experience INT CHECK (experience >= 0),
-    rating NUMERIC(3,2) CHECK (rating BETWEEN 0 AND 5),
-
-    FOREIGN KEY (user_id, role) REFERENCES users(id, role) ON DELETE CASCADE
+    rating NUMERIC(3,2) CHECK (rating BETWEEN 0 AND 5)
 );
 
 CREATE TABLE partner_university (
@@ -58,7 +51,7 @@ CREATE TABLE partner_university (
     country TEXT NOT NULL
 );
 
-CREATE TABLE textbook (
+CREATE TABLE textbooks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     author TEXT,
@@ -66,67 +59,66 @@ CREATE TABLE textbook (
     UNIQUE (title, author)
 );
 
-CREATE TABLE topic (
+CREATE TABLE topics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT UNIQUE NOT NULL
 );
 
-CREATE TABLE course (
+CREATE TABLE courses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT,
     program_type program_enum NOT NULL,
     duration INT NOT NULL CHECK (duration > 0),
     university_id UUID NOT NULL REFERENCES partner_university(id),
-    book_id UUID REFERENCES textbook(id),
-
+    book_id UUID REFERENCES textbooks(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     UNIQUE (name, university_id)
 );
 
-CREATE INDEX idx_course_university ON course(university_id);
+CREATE INDEX idx_course_university ON courses(university_id);
 
-CREATE TABLE content (
+CREATE TABLE contents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    course_id UUID NOT NULL REFERENCES course(id) ON DELETE CASCADE,
+    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
     type content_enum NOT NULL,
     body TEXT,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_content_course ON content(course_id);
+CREATE INDEX idx_content_course ON contents(course_id);
 
 
--- RELATIONSHIPS
+-- Many-to-many relationships
 
-CREATE TABLE course_topic (
-    course_id UUID REFERENCES course(id) ON DELETE CASCADE,
-    topic_id UUID REFERENCES topic(id) ON DELETE CASCADE,
+CREATE TABLE course_topics (
+    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+    topic_id UUID REFERENCES topics(id) ON DELETE CASCADE,
 
     PRIMARY KEY (course_id, topic_id)
 );
 
-CREATE INDEX idx_topic_rel ON course_topic(topic_id);
+CREATE INDEX idx_course_topics_topic ON course_topics(topic_id);
 
 CREATE TABLE teaches (
-    inst_id UUID REFERENCES instructor(user_id) ON DELETE CASCADE,
-    course_id UUID REFERENCES course(id) ON DELETE CASCADE,
-    
-    PRIMARY KEY (inst_id, course_id)
+    instructor_id UUID REFERENCES instructors(user_id) ON DELETE CASCADE,
+    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (instructor_id, course_id)
 );
 
 CREATE INDEX idx_teaches_course ON teaches(course_id);
 
-CREATE TABLE enrollment (
-    student_id UUID REFERENCES student(user_id) ON DELETE CASCADE,
-    course_id UUID REFERENCES course(id) ON DELETE CASCADE,
+CREATE TABLE enrollments (
+    student_id UUID REFERENCES students(user_id) ON DELETE CASCADE,
+    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
     marks INT CHECK (marks BETWEEN 0 AND 100),
-
+    
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     PRIMARY KEY (student_id, course_id)
 );
 
-CREATE INDEX idx_enroll_course ON enrollment(course_id);
+CREATE INDEX idx_enroll_course ON enrollments(course_id);

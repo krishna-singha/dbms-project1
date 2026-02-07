@@ -1,136 +1,177 @@
-import { query, withTransaction } from '@/lib/db/pool';
-import { hashPassword, generateToken } from '@/lib/auth';
+import { NextResponse } from "next/server";
+import { query, withTransaction } from "@/lib/db/pool";
+import { hashPassword, generateToken } from "@/lib/auth/crypto";
 import {
-  successResponse,
   errorResponse,
   validationErrorResponse,
   validateRequired,
   isValidEmail,
-} from '@/lib/apiHelpers';
+  isValidPassword
+} from "@/lib/apiHelpers";
 
-const VALID_ROLES = ['STUDENT', 'INSTRUCTOR', 'ADMIN', 'DATA_ANALYST'];
+const VALID_ROLES = ["STUDENT", "INSTRUCTOR", "ADMIN", "DATA_ANALYST"];
+const VALID_SKILL_LEVELS = [
+  "BEGINNER",
+  "INTERMEDIATE",
+  "ADVANCED",
+];
 
 export async function POST(request) {
   let body = {};
+
   try {
     body = await request.json();
   } catch {
-    return validationErrorResponse({ body: 'Invalid JSON body' });
+    return validationErrorResponse({ body: "Invalid JSON body" });
   }
 
-  const { email, password, role, ...profileData } = body;
+  const { name, email, password, role, ...profileData } = body;
 
-  const errors = validateRequired(body, ['email', 'password', 'role']);
+  const errors = validateRequired(body, ["name", "email", "password", "role"]);
   if (errors) return validationErrorResponse(errors);
 
   if (!isValidEmail(email)) {
-    return validationErrorResponse({ email: 'Invalid email format' });
+    return validationErrorResponse({ email: "Invalid email format" });
   }
 
   if (!VALID_ROLES.includes(role)) {
     return validationErrorResponse({
-      role: 'Invalid role. Must be STUDENT, INSTRUCTOR, ADMIN, or DATA_ANALYST',
+      role: "Invalid role",
+    });
+  }
+
+  if (!isValidPassword(password)) {
+    return validationErrorResponse({
+      password: "Password must be at least 8 characters and include uppercase, lowercase, and a number",
     });
   }
 
   const { rows: existing } = await query(
-    'SELECT 1 FROM users WHERE email = $1',
+    "SELECT 1 FROM users WHERE email = $1",
     [email]
   );
 
   if (existing.length > 0) {
-    return errorResponse('User with this email already exists', 409);
+    return errorResponse("User with this email already exists", 409);
   }
 
   const passwordHash = await hashPassword(password);
 
   try {
-    const result = await withTransaction(async (client) => {
-      // Create user
+    const user = await withTransaction(async (client) => {
       const { rows } = await client.query(
         `
-        INSERT INTO users (email, password_hash, role)
-        VALUES ($1, $2, $3)
-        RETURNING id, email, role, created_at
+        INSERT INTO users (name, email, password_hash, role)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, name, email, role, created_at
         `,
-        [email, passwordHash, role]
+        [name, email, passwordHash, role]
       );
 
-      const user = rows[0];
+      const createdUser = rows[0];
 
-      // Role-specific profile
-      if (role === 'STUDENT') {
-        const { name, age, country, skill_level, category } = profileData;
+      switch (role) {
+        case "STUDENT": {
+          const { age, country, skill_level, category } = profileData;
 
-        if (!name) {
-          throw {
-            type: 'validation',
-            errors: { name: 'Name is required for students' },
-          };
+          if (
+            skill_level &&
+            !VALID_SKILL_LEVELS.includes(skill_level)
+          ) {
+            throw {
+              type: "validation",
+              errors: { skill_level: "Invalid skill level" },
+            };
+          }
+
+          if (age && Number.isNaN(Number(age))) {
+            throw {
+              type: "validation",
+              errors: { age: "Age must be a number" },
+            };
+          }
+
+          await client.query(
+            `
+            INSERT INTO students (user_id, age, country, skill_level, category)
+            VALUES ($1, $2, $3, $4, $5)
+            `,
+            [
+              createdUser.id,
+              age ? Number(age) : null,
+              country ?? null,
+              skill_level ?? null,
+              category ?? null,
+            ]
+          );
+          break;
         }
 
-        await client.query(
-          `
-          INSERT INTO student (user_id, role, name, age, country, skill_level, category)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-          `,
-          [
-            user.id,
-            role,
-            name,
-            age ?? null,
-            country ?? null,
-            skill_level ?? null,
-            category ?? null,
-          ]
-        );
-      }
+        case "INSTRUCTOR": {
+          const { experience } = profileData;
 
-      if (role === 'INSTRUCTOR') {
-        const { name, experience = 0, rating = 0 } = profileData;
+          if (experience && Number.isNaN(Number(experience))) {
+            throw {
+              type: "validation",
+              errors: { experience: "Experience must be a number" },
+            };
+          }
 
-        if (!name) {
-          throw {
-            type: 'validation',
-            errors: { name: 'Name is required for instructors' },
-          };
+          await client.query(
+            `
+            INSERT INTO instructors (user_id, experience, rating)
+            VALUES ($1, $2, $3)
+            `,
+            [createdUser.id, experience ? Number(experience) : 0, 0]
+          );
+          break;
         }
 
-        await client.query(
-          `
-          INSERT INTO instructor (user_id, role, name, experience, rating)
-          VALUES ($1, $2, $3, $4, $5)
-          `,
-          [user.id, role, name, experience, rating]
-        );
+        case "ADMIN":
+        case "DATA_ANALYST":
+          break;
+
+        default:
+          throw new Error("Invalid role");
       }
-      return user;
+
+      return createdUser;
     });
 
     const token = generateToken({
-      userId: result.id,
-      email: result.email,
-      role: result.role,
+      userId: user.id,
+      email: user.email,
+      role: user.role,
     });
 
-    return successResponse(
+    const response = NextResponse.json(
       {
-        user: result,
-        token,
+        success: true,
+        message: "User registered successfully",
+        user,
       },
-      'User registered successfully',
-      201
+      { status: 201 }
     );
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
+
+    return response;
   } catch (err) {
-    if (err?.type === 'validation') {
+    if (err?.type === "validation") {
       return validationErrorResponse(err.errors);
     }
 
-    console.error('Registration error', {
+    console.error("Registration error", {
       message: err.message,
       code: err.code,
     });
 
-    return errorResponse('Failed to register user', 500);
+    return errorResponse("Failed to register user", 500);
   }
 }

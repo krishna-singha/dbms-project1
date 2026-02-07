@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { withTransaction } from "./pool.js";
 
+const ADMIN_NAME = process.env.ADMIN_NAME || "Admin User";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS) || 12;
@@ -22,10 +23,10 @@ const seedAdmin = async () => {
 
     await client.query(
       `
-      INSERT INTO users (email, password_hash, role)
-      VALUES ($1, $2, 'ADMIN')
+      INSERT INTO users (name, email, password_hash, role)
+      VALUES ($1, $2, $3, 'ADMIN')
       `,
-      [ADMIN_EMAIL, passwordHash],
+      [ADMIN_NAME, ADMIN_EMAIL, passwordHash],
     );
 
     console.log("Admin user seeded successfully");
