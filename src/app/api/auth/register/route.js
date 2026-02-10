@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { query, withTransaction } from "@/lib/db/pool";
-import { hashPassword, generateToken } from "@/lib/auth/crypto";
+import { hashPassword, generateToken } from "@/lib/crypto";
 import {
   errorResponse,
   validationErrorResponse,
   validateRequired,
   isValidEmail,
-  isValidPassword
+  isValidPassword,
 } from "@/lib/apiHelpers";
 
-const VALID_ROLES = ["STUDENT", "INSTRUCTOR", "ADMIN", "DATA_ANALYST"];
+const VALID_ROLES = ["STUDENT", "INSTRUCTOR"];
+
 const VALID_SKILL_LEVELS = [
   "BEGINNER",
   "INTERMEDIATE",
@@ -36,13 +37,14 @@ export async function POST(request) {
 
   if (!VALID_ROLES.includes(role)) {
     return validationErrorResponse({
-      role: "Invalid role",
+      role: "Invalid role for public registration",
     });
   }
 
   if (!isValidPassword(password)) {
     return validationErrorResponse({
-      password: "Password must be at least 8 characters and include uppercase, lowercase, and a number",
+      password:
+        "Password must be at least 8 characters and include uppercase, lowercase, and a number",
     });
   }
 
@@ -126,10 +128,6 @@ export async function POST(request) {
           );
           break;
         }
-
-        case "ADMIN":
-        case "DATA_ANALYST":
-          break;
 
         default:
           throw new Error("Invalid role");

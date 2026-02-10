@@ -1,7 +1,10 @@
+
 import Link from "next/link";
 import { getServerUser } from "@/lib/serverAuth";
 import { NAV_BY_ROLE } from "@/lib/navConfig";
 import NavbarClient from "./NavbarClient";
+
+export const dynamic = 'force-dynamic';
 
 export default async function Navbar() {
   const user = await getServerUser();

@@ -1,4 +1,4 @@
-import { verifyToken } from "./crypto";
+import { verifyToken } from "../crypto";
 
 export const extractToken = (request) => {
   const authHeader = request.headers.get("authorization");

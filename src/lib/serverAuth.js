@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { verifyToken } from './auth/crypto';
+import { verifyToken } from './crypto';
 import { query } from './db/pool';
 
 export async function getServerUser() {

@@ -22,18 +22,12 @@ export const useAuth = () => {
     const isAuthPage =
       pathname === '/login' || pathname === '/register' || pathname === '/';
 
-    // already authenticated or on public pages - don't check
-    if (isAuthenticated || isAuthPage) {
+    if (isAuthPage) {
       setLoading(false);
-      hasCheckedAuth.current = true;
       return;
     }
 
-    // Skip if we've already checked auth and user is not authenticated
-    if (hasCheckedAuth.current) {
-      setLoading(false);
-      return;
-    }
+    if (hasCheckedAuth.current) return;
 
     let isMounted = true;
 
@@ -51,13 +45,12 @@ export const useAuth = () => {
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
-        } else if (response.status === 401) {
-          clearUser();
         } else {
-          console.warn('Auth check failed with status', response.status);
+          clearUser();
         }
       } catch (error) {
         console.error('Failed to fetch current user:', error);
+        clearUser();
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -71,13 +64,7 @@ export const useAuth = () => {
     return () => {
       isMounted = false;
     };
-  }, [
-    pathname,
-    isAuthenticated,
-    setUser,
-    clearUser,
-    setLoading,
-  ]);
+  }, [pathname, setUser, clearUser, setLoading]);
 
   const login = async (email, password) => {
     try {
@@ -88,14 +75,15 @@ export const useAuth = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-      
       if (response.ok) {
-        router.refresh();
+        const data = await response.json();
         setUser(data.user);
-        return { success: true, data };
+        router.refresh();
+        router.push('/dashboard');
+        return { success: true };
       }
 
+      const data = await response.json();
       return {
         success: false,
         error: data.error || 'Login failed',
@@ -115,14 +103,15 @@ export const useAuth = () => {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        router.refresh();
+        const data = await response.json();
         setUser(data.user);
-        return { success: true, data };
+        router.refresh();
+        router.push('/dashboard');
+        return { success: true };
       }
 
+      const data = await response.json();
       return {
         success: false,
         error: data.error || 'Registration failed',
@@ -142,9 +131,9 @@ export const useAuth = () => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      router.refresh();
-      router.push('/');
       clearUser();
+      router.push('/');
+      router.refresh();
     }
   };
 

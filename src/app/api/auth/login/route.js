@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db/pool";
-import { verifyPassword, generateToken } from "@/lib/auth/crypto";
+import { verifyPassword, generateToken } from "@/lib/crypto";
 import {
   errorResponse,
   validationErrorResponse,
@@ -44,6 +44,9 @@ export async function POST(request) {
       "$2b$12$invalidinvalidinvalidinvalidinvalidinv";
 
     const passwordOk = await verifyPassword(password, passwordHash);
+    console.log(passwordOk);
+
+    
 
     if (!user || !passwordOk) {
       return errorResponse("Invalid email or password", 401);

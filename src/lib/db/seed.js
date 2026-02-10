@@ -1,10 +1,9 @@
-import bcrypt from "bcrypt";
 import { withTransaction } from "./pool.js";
+import { hashPassword } from "@/lib/crypto.js";
 
 const ADMIN_NAME = process.env.ADMIN_NAME || "Admin User";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
-const SALT_ROUNDS = Number(process.env.SALT_ROUNDS) || 12;
 
 // Seed default admin user
 const seedAdmin = async () => {
@@ -19,7 +18,7 @@ const seedAdmin = async () => {
       return;
     }
 
-    const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
+    const passwordHash = await hashPassword(ADMIN_PASSWORD);
 
     await client.query(
       `
@@ -28,6 +27,9 @@ const seedAdmin = async () => {
       `,
       [ADMIN_NAME, ADMIN_EMAIL, passwordHash],
     );
+
+    console.log("pass: ", ADMIN_PASSWORD);
+    
 
     console.log("Admin user seeded successfully");
   });

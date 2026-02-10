@@ -138,12 +138,12 @@ export default function LoginPage() {
                 <label className={labelStyle.replace("mb-2", "")}>
                   Password
                 </label>
-                <a
+                <Link
                   href="#"
                   className="text-xs text-indigo-600 hover:underline font-semibold"
                 >
                   Forgot?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <Lock
@@ -163,7 +163,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShow(!show)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors"
+                  className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors"
                   disabled={isSubmitting}
                 >
                   {show ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -179,7 +179,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Signing In..." : "Sign In"}

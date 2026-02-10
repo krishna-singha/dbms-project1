@@ -72,6 +72,7 @@ CREATE TABLE courses (
     duration INT NOT NULL CHECK (duration > 0),
     university_id UUID NOT NULL REFERENCES partner_university(id),
     book_id UUID REFERENCES textbooks(id),
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     UNIQUE (name, university_id)

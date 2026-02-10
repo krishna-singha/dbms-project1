@@ -1,31 +1,53 @@
-import { Shield } from "lucide-react";
-import SectionTitle from "@/app/ui/SectionTitle";
-import Card from "@/app/ui/Card";
-import ActionCard from "@/app/ui/ActionCard";
+import { 
+  Shield, 
+  Users, 
+  GraduationCap, 
+  BookOpen, 
+  Building2, 
+  UserCheck,
+  ArrowUpRight,
+  Plus,
+  Moon,
+  Sun,
+  Sunrise,
+  ArrowRight
+} from "lucide-react";
+import Card from "@/ui/Card";
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ stats }) => {
+
   return (
-    <>
-      <SectionTitle
-        icon={<Shield />}
-        title="Platform Control"
-      />
-
-      <div className="grid md:grid-cols-4 gap-6">
-        <Card title="Total Users" value="12,430" />
-        <Card title="Instructors" value="1,102" />
-        <Card title="Students" value="11,214" />
-        <Card title="Reports" value="17" />
+    <div className="space-y-10 pb-20">
+     
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card 
+          title="Total Students" 
+          value={stats.studentCount.toLocaleString()} 
+          icon={<Users className="text-blue-600" size={20} />}
+          className="bg-white"
+        />
+        <Card 
+          title="Total Instructors" 
+          value={stats.instructorCount.toLocaleString()} 
+          icon={<GraduationCap className="text-purple-600" size={20} />}
+          className="bg-white"
+        />
+        <Card 
+          title="Total Courses" 
+          value={stats.courseCount} 
+          icon={<BookOpen className="text-emerald-600" size={20} />}
+          className="bg-white"
+        />
+        <Card 
+          title="Total Partner Universities" 
+          value={stats.universityCount} 
+          icon={<Building2 className="text-orange-600" size={20} />}
+          className="bg-white"
+        />
       </div>
 
-      <SectionTitle title="Admin Actions" />
-
-      <div className="grid md:grid-cols-3 gap-6">
-        <ActionCard text="Manage Users" />
-        <ActionCard text="Review Courses" />
-        <ActionCard text="System Settings" />
-      </div>
-    </>
+      
+    </div>
   );
 };
 
