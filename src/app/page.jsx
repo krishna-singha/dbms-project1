@@ -10,6 +10,7 @@ import {
 import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/serverAuth";
 
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: "EduPlatform - Home",

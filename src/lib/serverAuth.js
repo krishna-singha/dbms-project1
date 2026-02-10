@@ -3,6 +3,11 @@ import { verifyToken } from './crypto';
 import { query } from './db/pool';
 
 export async function getServerUser() {
+  // During build time, return null to allow static generation
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return null;
+  }
+
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;

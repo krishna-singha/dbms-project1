@@ -6,6 +6,8 @@ import InstructorDashboard from "@/components/InstructorDashboard";
 import AdminDashboard from "@/components/AdminDashboard";
 import DataAnalystDashboard from "@/components/DataAnalystDashboard";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const user = await getServerUser();
   if (!user) redirect("/");

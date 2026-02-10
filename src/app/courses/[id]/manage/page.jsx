@@ -6,6 +6,7 @@ import { query } from "@/lib/db/pool";
 import { redirect, notFound } from "next/navigation";
 import ManageCourseUsers from "../../../../components/ManageCourseUsers";
 
+export const dynamic = 'force-dynamic';
 export const runtime = "nodejs";
 
 export default async function ManageCoursePage({ params }) {

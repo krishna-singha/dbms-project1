@@ -5,6 +5,8 @@ import Link from "next/link";
 import { GraduationCap, ArrowLeft, Settings, Clock, BookOpen } from "lucide-react";
 import CourseContent from "../../../components/CourseContent";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CourseDetail({ params }) {
   const { id } = await params;
   const user = await getServerUser();

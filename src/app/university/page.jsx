@@ -2,6 +2,7 @@ import { getServerUser } from "@/lib/serverAuth";
 import { query } from "@/lib/db/pool";
 import UniversityList from "../../components/UniversityList";
 
+export const dynamic = 'force-dynamic';
 export const runtime = "nodejs";
 
 export default async function UniversityPage() {

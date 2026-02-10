@@ -5,6 +5,11 @@ let pool;
 // Get or create the database connection pool
 const getPool = () => {
   if (!pool) {
+    // Skip database connection during build
+    if (process.env.NEXT_PHASE === 'phase-production-build' || !process.env.DATABASE_URL) {
+      throw new Error('Database not available during build');
+    }
+    
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 20,
