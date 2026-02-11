@@ -79,8 +79,9 @@ const AnalysisPage = async ({ params }) => {
   );
   const distribution = marksDist[0];
 
-  const passRate = stats.total_students > 0 
-    ? ((parseInt(stats.passed_students) / parseInt(stats.total_students)) * 100).toFixed(1)
+  const gradedStudents = parseInt(stats.total_students) - parseInt(stats.not_graded);
+  const passRate = gradedStudents > 0 
+    ? ((parseInt(stats.passed_students) / gradedStudents) * 100).toFixed(1)
     : 0;
 
   return (
