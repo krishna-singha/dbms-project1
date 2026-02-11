@@ -1,16 +1,8 @@
 import { 
-  Shield, 
   Users, 
   GraduationCap, 
   BookOpen, 
   Building2, 
-  UserCheck,
-  ArrowUpRight,
-  Plus,
-  Moon,
-  Sun,
-  Sunrise,
-  ArrowRight
 } from "lucide-react";
 import Card from "@/ui/Card";
 

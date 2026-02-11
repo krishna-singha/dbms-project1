@@ -21,7 +21,7 @@ export default async function DashboardPage() {
       ? user.name.split(" ").slice(0, -1).join(" ")
       : user.name;
 
-  if (role === "ADMIN") {
+  if (role === "ADMIN" || role === "DATA_ANALYST") {
     const { rows } = await query(`
       WITH counts AS (
         SELECT 
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
         {role === "STUDENT" && <StudentDashboard stats={stats} user={user} />}
         {role === "INSTRUCTOR" && <InstructorDashboard stats={stats} />}
         {role === "ADMIN" && <AdminDashboard stats={stats} />}
-        {role === "DATA_ANALYST" && <DataAnalystDashboard />}
+        {role === "DATA_ANALYST" && <DataAnalystDashboard stats={stats} />}
       </main>
     </div>
   );
