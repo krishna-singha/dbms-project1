@@ -22,6 +22,7 @@ export const NAV_BY_ROLE = {
 
   DATA_ANALYST: [
     { label: "Dashboard", href: "/dashboard", icon: "chart" },
+    { label: "Courses", href: "/courses", icon: "book" },
     { label: "University", href: "/university", icon: "building" },
   ],
 };
