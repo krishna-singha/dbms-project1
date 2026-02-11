@@ -128,14 +128,33 @@ export default async function CourseDetail({ params }) {
                 </Link>
               )}
 
-              {isAdmin && (
+              {user?.role === "DATA_ANALYST" && (
                 <Link
-                  href={`/courses/${course.id}/manage`}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-slate-800"
+                  href={`/courses/${course.id}/analysis`}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-purple-600 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-purple-700"
                 >
-                  <Settings size={18} />
-                  Manage Course
+                  <GraduationCap size={18} />
+                  View Analytics
                 </Link>
+              )}
+
+              {isAdmin && (
+                <>
+                  <Link
+                    href={`/courses/${course.id}/manage`}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-slate-800"
+                  >
+                    <Settings size={18} />
+                    Manage Course
+                  </Link>
+                  <Link
+                    href={`/courses/${course.id}/analysis`}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-purple-600 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-purple-700"
+                  >
+                    <GraduationCap size={18} />
+                    View Analytics
+                  </Link>
+                </>
               )}
             </div>
           </div>

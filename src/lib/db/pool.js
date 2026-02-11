@@ -18,7 +18,7 @@ const getPool = () => {
       max: 20,
       idleTimeoutMillis: 30000,
       // Increased to 10s to handle cold starts and campus network lag
-      connectionTimeoutMillis: 10000, 
+      connectionTimeoutMillis: 20000, 
       ssl: isExternal ? { rejectUnauthorized: false } : false,
     });
 
