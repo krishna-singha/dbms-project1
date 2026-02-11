@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "EduPlatform",
+  title: "BongoDB",
   description: "Your learning platform",
 };
 

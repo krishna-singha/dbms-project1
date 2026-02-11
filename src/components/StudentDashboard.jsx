@@ -8,7 +8,7 @@ export default function StudentDashboard({ stats, user }) {
 
       <div className="grid md:grid-cols-3 gap-6">
         <Card title="My Courses" value={stats.enrollments.length} icon={<GraduationCap className="text-indigo-600" />} />
-        <Card title="Skill Level" value="Intermediate" icon={<PlayCircle className="text-purple-600" />} />
+        <Card title="Skill Level" value={user.profile.skill_level} icon={<PlayCircle className="text-purple-600" />} />
       </div>
 
       <h3 className="text-xl font-black text-slate-900">Jump Back In</h3>

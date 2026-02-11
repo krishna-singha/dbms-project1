@@ -191,7 +191,7 @@ export default function RegisterPage() {
         <div className="bg-white p-8 md:p-12 rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-gray-100">
           <div className="mb-10 text-center">
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-              {step === 1 ? "Join EduPlatform" : "Almost there!"}
+              {step === 1 ? "Join BongoDB" : "Almost there!"}
             </h1>
             <p className="text-gray-500 mt-2 font-medium">
               {step === 1

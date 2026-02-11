@@ -13,8 +13,8 @@ import { getServerUser } from "@/lib/serverAuth";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: "EduPlatform - Home",
-  description: "Welcome to EduPlatform, your learning platform",
+  title: "BongoDB - Home",
+  description: "Welcome to BongoDB, your learning platform",
 };
 
 export default async function Home() {

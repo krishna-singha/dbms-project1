@@ -6,7 +6,7 @@ import InstructorDashboard from "@/components/InstructorDashboard";
 import AdminDashboard from "@/components/AdminDashboard";
 import DataAnalystDashboard from "@/components/DataAnalystDashboard";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const user = await getServerUser();
@@ -15,34 +15,40 @@ export default async function DashboardPage() {
   const role = user.role;
   let stats = {};
 
+  // remove last word from name if it has more than one word, otherwise use the full name
+  const cleanFirstName =
+    user.name.split(" ").length > 1
+      ? user.name.split(" ").slice(0, -1).join(" ")
+      : user.name;
+
   if (role === "ADMIN") {
-    const { rows: uStats } = await query(
-      `SELECT COUNT(*) FILTER (WHERE role = 'STUDENT') as "students", COUNT(*) FILTER (WHERE role = 'INSTRUCTOR') as "instructors" FROM users`,
-    );
-    const { rows: cStats } = await query(
-      `SELECT COUNT(*) as "courses" FROM courses`,
-    );
-    const { rows: nStats } = await query(
-      `SELECT COUNT(*) as "unis" FROM partner_university`,
-    );
-    const { rows: eStats } = await query(
-      `SELECT COUNT(*) as "enrolls" FROM enrollments`,
-    );
+    const { rows } = await query(`
+      WITH counts AS (
+        SELECT 
+          (SELECT COUNT(*) FROM users WHERE role = 'STUDENT') as students,
+          (SELECT COUNT(*) FROM users WHERE role = 'INSTRUCTOR') as instructors,
+          (SELECT COUNT(*) FROM courses) as courses,
+          (SELECT COUNT(*) FROM partner_university) as unis,
+          (SELECT COUNT(*) FROM enrollments) as enrolls
+      )
+      SELECT * FROM counts
+    `);
+
+    const data = rows[0];
     stats = {
-      studentCount: parseInt(uStats[0].students),
-      instructorCount: parseInt(uStats[0].instructors),
-      courseCount: parseInt(cStats[0].courses),
-      universityCount: parseInt(nStats[0].unis),
-      enrollmentCount: parseInt(eStats[0].enrolls),
+      studentCount: parseInt(data.students),
+      instructorCount: parseInt(data.instructors),
+      courseCount: parseInt(data.courses),
+      universityCount: parseInt(data.unis),
+      enrollmentCount: parseInt(data.enrolls),
     };
   } else if (role === "INSTRUCTOR") {
     const { rows: myCourses } = await query(
-      `
-      SELECT c.*, (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as students 
-      FROM courses c JOIN teaches t ON t.course_id = c.id WHERE t.instructor_id = $1`,
+      `SELECT c.*, (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as students 
+       FROM courses c JOIN teaches t ON t.course_id = c.id WHERE t.instructor_id = $1`,
       [user.id],
     );
-    const { rows } = await query(
+    const { rows: instrInfo } = await query(
       `SELECT rating FROM instructors WHERE user_id = $1`,
       [user.id],
     );
@@ -52,18 +58,41 @@ export default async function DashboardPage() {
         (acc, curr) => acc + parseInt(curr.students),
         0,
       ),
-      rating: rows[0]?.rating ?? null,
+      rating: instrInfo[0]?.rating ?? null,
     };
   } else if (role === "STUDENT") {
     const { rows: myEnrolls } = await query(
-      `
-      SELECT c.*, u.name as university FROM courses c 
-      JOIN enrollments e ON e.course_id = c.id 
-      JOIN partner_university u ON u.id = c.university_id WHERE e.student_id = $1`,
+      `SELECT c.*, u.name as university FROM courses c 
+       JOIN enrollments e ON e.course_id = c.id 
+       JOIN partner_university u ON u.id = c.university_id WHERE e.student_id = $1`,
       [user.id],
     );
     stats = { enrollments: myEnrolls };
   }
+
+  const portalConfig = {
+    STUDENT: { 
+      title: "Student Portal", 
+      greeting: "Welcome back [Student]," 
+    },
+    INSTRUCTOR: {
+      title: "Faculty Portal",
+      greeting: "Welcome back [Instructor],",
+    },
+    ADMIN: { 
+      title: "Admin Portal", 
+      greeting: "Welcome back [Admin]," 
+    },
+    DATA_ANALYST: {
+      title: "Data Analyst Portal",
+      greeting: "Welcome back [Data Analyst],",
+    },
+  };
+
+  const config = portalConfig[role] || {
+    title: "Portal",
+    greeting: "Welcome back,",
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -71,10 +100,13 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-black text-slate-900">
-              Faculty Portal
+              {config.title}
             </h1>
             <p className="text-slate-500 font-medium italic">
-              Welcome back, Professor {user.name.split(" ")[0]}
+              {config.greeting}{" "}
+              <span className="text-indigo-500 font-bold">
+                {cleanFirstName}
+              </span>
             </p>
           </div>
         </div>
