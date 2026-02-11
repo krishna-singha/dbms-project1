@@ -87,10 +87,10 @@ export default async function Home() {
             </p>
 
             <ul className="mt-6 space-y-3 font-medium">
-              <li>✅ Beginner to advanced learning paths</li>
-              <li>✅ Practical, real-world projects</li>
-              <li>✅ Track your progress and growth</li>
-              <li>✅ Learn from industry professionals</li>
+              <li>Beginner to advanced learning paths</li>
+              <li>Practical, real-world projects</li>
+              <li>Track your progress and growth</li>
+              <li>Learn from industry professionals</li>
             </ul>
           </div>
 
@@ -124,58 +124,12 @@ export default async function Home() {
             </p>
 
             <ul className="mt-6 space-y-3 font-medium">
-              <li>✅ Build and manage courses easily</li>
-              <li>✅ Reach motivated learners</li>
-              <li>✅ Track engagement and success</li>
-              <li>✅ Get rewarded for quality teaching</li>
+              <li>Build and manage courses easily</li>
+              <li>Reach motivated learners</li>
+              <li>Track engagement and success</li>
+              <li>Get rewarded for quality teaching</li>
             </ul>
           </div>
-        </div>
-      </section>
-
-      <section>
-        <div className="max-w-6xl mx-auto px-6 py-24">
-          <h2 className="text-4xl font-black text-center">
-            Popular Categories
-          </h2>
-
-          <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              "Computer Science",
-              "Web Development",
-              "Data Science",
-              "Design",
-              "AI & ML",
-              "Business",
-              "Cybersecurity",
-              "Marketing"
-            ].map((cat) => (
-              <div
-                key={cat}
-                className="p-6 border border-gray-200 rounded-2xl font-bold text-center hover:shadow-lg transition"
-              >
-                {cat}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-indigo-600 text-white">
-        <div className="max-w-5xl mx-auto px-6 py-24 text-center">
-          <h2 className="text-4xl font-black">
-            Start Learning or Teaching Today
-          </h2>
-          <p className="mt-4 text-indigo-100">
-            Join thousands of learners and instructors growing together.
-          </p>
-
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 mt-8 px-8 py-4 bg-white text-indigo-600 font-bold rounded-2xl hover:bg-gray-100 transition"
-          >
-            Create Free Account <ArrowRight />
-          </Link>
         </div>
       </section>
 
