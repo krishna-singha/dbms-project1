@@ -40,10 +40,6 @@ export default function DataAnalystDashboard({ stats }) {
           className="bg-white"
         />
       </div>
-
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black text-slate-900">Dashboard</h1>
-      </div>
       
     </div>
   );
